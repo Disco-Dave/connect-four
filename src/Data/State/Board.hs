@@ -2,14 +2,16 @@
 module Data.State.Board
   ( Column(..)
   , Chip(..)
+  , UpdateResult(..)
   , Board
   , Data.State.Board.init
   , dropInto
-  , BoardUpdateResult(..)
   )
 where
 
 import           Prelude
+import           Control.Monad                  ( guard )
+import           Data.State.Common
 import           Data.Map                       ( (!)
                                                 , update
                                                 )
@@ -41,14 +43,13 @@ newtype ColumnState = ColumnState { unwrapColumnState :: [Chip] }
 initColumnState :: ColumnState
 initColumnState = ColumnState []
 
-data ColumnUpdateResult
-  = ColumnFailedToUpdate
-  | ColumUpdatedSuccessfully ColumnState
+maxColumnHeight :: Int
+maxColumnHeight = 7
 
-dropIntoColumn :: Chip -> ColumnState -> ColumnUpdateResult
-dropIntoColumn chip (ColumnState oldState) = if length oldState >= 7
-  then ColumnFailedToUpdate
-  else ColumUpdatedSuccessfully $ ColumnState $ chip : oldState
+dropIntoColumn :: Chip -> ColumnState -> UpdateResult ColumnState
+dropIntoColumn chip (ColumnState oldState) = do
+  guard $ length oldState < maxColumnHeight
+  return $ ColumnState $ chip : oldState
 
 
 
@@ -63,16 +64,9 @@ newtype Board = Board { unwrapBoard :: Map Column ColumnState }
 init :: Board
 init = Board $ fromList $ (, initColumnState) <$> enumFrom minBound
 
-data BoardUpdateResult
-  = BoardFailedToUpdate
-  | BoardUpdatedSuccessfully Board
-  deriving Show
-
 -- | Drop a chip into a column
-dropInto :: Chip -> Column -> Board -> BoardUpdateResult
-dropInto chip column (Board oldState) =
-  case dropIntoColumn chip (oldState ! column) of
-    ColumnFailedToUpdate -> BoardFailedToUpdate
-    ColumUpdatedSuccessfully newColumnState ->
-      let newBoardState = update (const $ Just newColumnState) column oldState
-      in  BoardUpdatedSuccessfully $ Board newBoardState
+dropInto :: Chip -> Column -> Board -> UpdateResult Board
+dropInto chip column (Board oldState) = do
+  newColumnState <- dropIntoColumn chip (oldState ! column)
+  let newBoardState = update (const $ Just newColumnState) column oldState
+  return $ Board newBoardState
