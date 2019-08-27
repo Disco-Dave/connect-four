@@ -21,10 +21,24 @@ description:         Please see the README on GitHub at <https://github.com/Disc
 
 default-extensions:
 - NoImplicitPrelude
+- OverloadedLists
+- OverloadedStrings
+- TupleSections
 
 dependencies:
 - base-noprelude >= 4.7 && < 5
 - relude
+- containers
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wpartial-fields
+- -Wredundant-constraints
+- -fno-warn-orphans
 
 library:
   source-dirs: src
