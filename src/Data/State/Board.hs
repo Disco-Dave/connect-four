@@ -16,11 +16,14 @@ where
 import           Prelude
 import           Control.Monad                  ( guard )
 import           GHC.Arr                        ( unsafeIndex )
-import qualified Data.Array                    as Array
-import           Data.Array                     ( Array )
 import           Data.State.Common
-import           Data.Map                       ( (!)
-                                                , update
+import           Data.Array                     ( (//)
+                                                , (!)
+                                                , array
+                                                , range
+                                                , listArray
+                                                , Ix(..)
+                                                , Array
                                                 )
 -- | Indentifies a row on the board.
 data Row
@@ -32,9 +35,9 @@ data Row
   | RowSix
   deriving (Show, Eq, Ord, Enum, Bounded)
 
-instance Array.Ix Row where
+instance Ix Row where
   range (s, e) = [s .. e]
-  inRange (s, e) i = i `elem` Array.range (s, e)
+  inRange (s, e) i = i `elem` range (s, e)
   unsafeIndex (s, _) i = fromEnum i - fromEnum s
 
 
@@ -51,9 +54,9 @@ data Column
   | ColumnSeven
   deriving (Show, Eq, Ord, Enum, Bounded)
 
-instance Array.Ix Column where
+instance Ix Column where
   range (s, e) = [s .. e]
-  inRange (s, e) i = i `elem` Array.range (s, e)
+  inRange (s, e) i = i `elem` range (s, e)
   unsafeIndex (s, _) i = fromEnum i - fromEnum s
 
 -- | Identifies a chip that can be placed in a column.
@@ -81,18 +84,22 @@ dropIntoColumn chip (ColumnState oldState) = do
 -- Board stuff
 
 -- | The state of the board.
-newtype Board = Board { unwrapBoard :: Map Column ColumnState }
+newtype Board = Board { unwrapBoard :: Array Column ColumnState }
   deriving Show
 
 -- | The initial board state.
 init :: Board
-init = Board $ fromList $ (, initColumnState) <$> enumFrom minBound
+init = Board boardArray
+ where
+  emptyColumns = initColumnState <$ enumFrom (minBound :: Column)
+  boardArray   = listArray (minBound, maxBound) emptyColumns
+
 
 -- | Drop a chip into a column
 dropInto :: Chip -> Column -> Board -> UpdateResult Board
 dropInto chip column' (Board oldState) = do
   newColumnState <- dropIntoColumn chip (oldState ! column')
-  let newBoardState = update (const $ Just newColumnState) column' oldState
+  let newBoardState = oldState // [(column', newColumnState)]
   return $ Board newBoardState
 
 -- | Get a column of the board
@@ -101,15 +108,14 @@ column column' (Board boardState) =
   let ColumnState columnState = boardState ! column'
       numberOfEmptySpots = fromEnum (maxBound :: Row) + 1 - length columnState
       chipStack = replicate numberOfEmptySpots Nothing <> fmap Just columnState
-  in  Array.array (minBound, maxBound) $ zip [minBound .. maxBound] chipStack
+  in  array (minBound, maxBound) $ zip [minBound .. maxBound] chipStack
 
 -- | Get the row of the board
 row :: Row -> Board -> Array Column (Maybe Chip)
 row row' board =
-  let columns' =
-          [ (c, column c board Array.! row') | c <- [minBound .. maxBound] ]
-  in  Array.array (minBound, maxBound) columns'
+  let columns' = [ (c, column c board ! row') | c <- [minBound .. maxBound] ]
+  in  array (minBound, maxBound) columns'
 
 -- | Get a slot of the board
 slot :: Row -> Column -> Board -> Maybe Chip
-slot row' column' board = column column' board Array.! row'
+slot row' column' board = column column' board ! row'

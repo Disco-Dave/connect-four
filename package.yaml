@@ -21,16 +21,11 @@ description:         Please see the README on GitHub at <https://github.com/Disc
 
 default-extensions:
 - NoImplicitPrelude
-- OverloadedLists
 - OverloadedStrings
-- TupleSections
-- FlexibleContexts
-- FlexibleInstances
 
 dependencies:
 - base-noprelude >= 4.7 && < 5
 - relude
-- containers
 - array
 
 ghc-options:
