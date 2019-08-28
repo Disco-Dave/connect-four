@@ -72,7 +72,7 @@ initColumnState = ColumnState []
 
 dropIntoColumn :: Chip -> ColumnState -> UpdateResult ColumnState
 dropIntoColumn chip (ColumnState oldState) = do
-  guard $ length oldState <= fromEnum (maxBound :: Row) + 1
+  guard $ length oldState < fromEnum (maxBound :: Row) + 1
   return $ ColumnState $ chip : oldState
 
 
