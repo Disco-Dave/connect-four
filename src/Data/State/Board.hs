@@ -67,7 +67,7 @@ data Chip
 
 -- | The state of a column.
 newtype ColumnState = ColumnState { unwrapColumnState :: [Chip] }
-  deriving Show
+  deriving (Show, Eq)
 
 -- | The initial state of a column.
 initColumnState :: ColumnState
@@ -85,7 +85,7 @@ dropIntoColumn chip (ColumnState oldState) = do
 
 -- | The state of the board.
 newtype Board = Board { unwrapBoard :: Array Column ColumnState }
-  deriving Show
+  deriving (Show, Eq)
 
 -- | The initial board state.
 init :: Board
