@@ -22,6 +22,7 @@ description:         Please see the README on GitHub at <https://github.com/Disc
 default-extensions:
 - NoImplicitPrelude
 - OverloadedStrings
+- FlexibleInstances
 
 dependencies:
 - base-noprelude >= 4.7 && < 5
@@ -62,3 +63,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - connect-four
+    - hspec
+    - QuickCheck
