@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables  #-}
+{-# LANGUAGE ViewPatterns  #-}
 
 module Data.State.CommonSpec
   ( spec
@@ -9,6 +10,7 @@ import           Prelude
 
 import           Test.Hspec
 import           Test.QuickCheck
+import           Test.QuickCheck.Function
 
 import           Data.State.Common
 
@@ -18,20 +20,25 @@ spec = describe "UpdateResult" $ do
   it "functor law: identity" $ property $ \(ur :: UpdateResult Int) ->
     fmap id ur `shouldBe` ur
 
-  it "functor law: homomorphism" $ property $ \(ur :: UpdateResult Int) ->
-    fmap ((* 2) . (* 3)) ur `shouldBe` (fmap (* 2) . fmap (* 3)) ur
-
+  it "functor law: composition" $ property $ 
+    \FunctorData{updateResult = ur, functor1 = (apply -> f), functor2 = (apply -> g)} ->
+      fmap (g . f) ur === (fmap g . fmap f $ ur)
+         
   it "applicative law: identity" $ property $ \(ur :: UpdateResult Int) ->
     pure id <*> ur `shouldBe` ur
 
-  it "applicative law: homomorpism" $
-    ((pure (*2) <*> pure 5) :: UpdateResult Int) `shouldBe` (pure (2 * 5) :: UpdateResult Int)
+  it "monad law: right identity" $ property $ \(ur :: UpdateResult Int) ->
+    (ur >>= return) === ur
+
+  it "monad law: left identity" $ property $ \MonadData{mPlainValue = v, mFunction1 = (apply -> f)} ->
+    (return v >>= f) === (f v)
 
   it "Alternative instance works" $ do
     (empty :: UpdateResult ()) `shouldBe` (UpdateFailed :: UpdateResult ())
     (UpdateSuccessful True <|> UpdateSuccessful False)
       `shouldBe` UpdateSuccessful True
     (UpdateFailed <|> UpdateSuccessful False) `shouldBe` UpdateSuccessful False
+
   it "Show instance works" $ do
     show (UpdateFailed :: UpdateResult ()) `shouldBe` ("UpdateFailed" :: String)
     show (UpdateSuccessful True) `shouldBe` ("UpdateSuccessful True" :: String)
@@ -57,3 +64,47 @@ instance Arbitrary (UpdateResult Int) where
   arbitrary = do
     n <- arbitrary :: Gen Int
     elements [UpdateFailed, UpdateSuccessful n]
+
+instance Arbitrary (UpdateResult Bool) where
+  arbitrary = do
+    n <- arbitrary :: Gen Bool
+    elements [UpdateFailed, UpdateSuccessful n]
+
+data FunctorData = FunctorData
+  { updateResult :: UpdateResult Int
+  , functor1 :: Fun Int Bool
+  , functor2 :: Fun Bool Int
+  } deriving Show
+
+instance Arbitrary FunctorData where
+  arbitrary =
+    FunctorData
+      <$> arbitrary
+      <*> arbitrary
+      <*> arbitrary
+
+data ApplicativeData = ApplicativeData
+  { aValue :: Int
+  , aFunction :: Fun Int String
+  } deriving Show
+
+instance Arbitrary ApplicativeData where
+  arbitrary =
+    ApplicativeData
+      <$> arbitrary
+      <*> arbitrary
+
+data MonadData = MonadData
+  { mUpdateResult :: UpdateResult Int
+  , mPlainValue :: Int
+  , mFunction1 :: Fun Int (UpdateResult Bool)
+  , mFunction2 :: Fun Bool (UpdateResult Int)
+  } deriving Show
+
+instance Arbitrary MonadData where
+  arbitrary =
+    MonadData
+      <$> arbitrary
+      <*> arbitrary
+      <*> arbitrary
+      <*> arbitrary
