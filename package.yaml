@@ -20,9 +20,11 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/Disco-Dave/connect-four#readme>
 
 default-extensions:
+- FlexibleInstances
 - NoImplicitPrelude
 - OverloadedStrings
-- FlexibleInstances
+- RecordWildCards
+- ViewPatterns
 
 dependencies:
 - base-noprelude >= 4.7 && < 5
