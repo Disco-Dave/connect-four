@@ -1,20 +1,13 @@
 module Data.State.Game
   ( Player(..)
-  , GameState(..)
-  , GameView(..)
-  , UpdateResult(..)
-  , Game
-  , getBoardState
-  , getGameState
-  , getActivePlayer
+  , WinningSlots(..)
+  , GameState
   , Data.State.Game.init
-  , view
-  , play
+  , playTurn
   )
 where
 
 import           Prelude
-import           Data.State.Common
 import qualified Data.State.Board              as Board
 import           Data.State.Board               ( Board )
 
@@ -23,44 +16,42 @@ data Player
   | PlayerTwo
   deriving (Show, Eq)
 
-data GameState
-  = OnGoing
-  | Tie
-  | Winner Player
+newtype WinningSlots = WinningSlots [(Board.Column, Board.Row)]
   deriving (Show, Eq)
 
-data Game = Game
-  { _boardState :: Board
-  , _gameState :: GameState
-  , _activePlayer :: Player
-  } deriving (Show, Eq)
+data GameState
+  = OnGoing Player Board
+  | Win Player WinningSlots Board
+  | Tie Board
+  deriving (Show, Eq)
 
-data GameView = GameView
-  { boardState :: Board
-  , gameState :: GameState
-  , activePlayer :: Player
-  } deriving (Show, Eq)
+init :: GameState
+init = OnGoing PlayerOne Board.init
 
-view :: Game -> GameView
-view Game {..} = GameView { boardState   = _boardState
-                          , gameState    = _gameState
-                          , activePlayer = _activePlayer
-                          }
+playTurn :: Board.Column -> GameState -> GameState
+playTurn column gameState@(OnGoing player board) =
+  let chip = playerToChip player
+  in  case Board.dropInto chip column board of
+        Board.UpdateFailed              -> gameState
+        Board.UpdateSuccessful newBoard -> 
+          case findAWin newBoard of
+            Just (winningPlayer, winningSlots) ->
+              Win winningPlayer winningSlots newBoard
+            _ -> if isBoardFull newBoard
+              then Tie newBoard
+              else OnGoing (otherPlayer player) newBoard
+playTurn _ gameState = gameState
 
-getBoardState :: Game -> Board
-getBoardState = _boardState
+isBoardFull :: Board -> Bool
+isBoardFull = _
 
-getGameState :: Game -> GameState
-getGameState = _gameState
+findAWin :: Board -> Maybe (Player, WinningSlots)
+findAWin = _
 
-getActivePlayer :: Game -> Player
-getActivePlayer = _activePlayer
+playerToChip :: Player -> Board.Chip
+playerToChip PlayerOne = Board.RedChip
+playerToChip PlayerTwo = Board.BlueChip
 
-init :: Game
-init = Game { _boardState   = Board.init
-            , _gameState    = OnGoing
-            , _activePlayer = PlayerOne
-            }
-
-play :: Board.Column -> Board.Chip -> Game -> UpdateResult Game
-play = _
+otherPlayer :: Player -> Player
+otherPlayer PlayerOne = PlayerTwo
+otherPlayer PlayerTwo = PlayerOne

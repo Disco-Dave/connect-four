@@ -25,6 +25,7 @@ default-extensions:
 - OverloadedStrings
 - RecordWildCards
 - ViewPatterns
+- MultiWayIf
 
 dependencies:
 - base-noprelude >= 4.7 && < 5
