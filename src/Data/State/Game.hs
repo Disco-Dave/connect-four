@@ -49,7 +49,7 @@ isBoardFull board =
   in  getAll . mconcat $ All . all isJust <$> columns
 
 findAWin :: Board -> Maybe (Player, WinningSlots)
-findAWin = _
+findAWin _ = Nothing
 
 
 playerToChip :: Player -> Board.Chip
