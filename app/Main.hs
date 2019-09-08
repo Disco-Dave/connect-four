@@ -2,7 +2,7 @@ module Main where
 
 import           Prelude
 import           Graphics.Gloss
-import           View.Gloss                     ( render )
+import           Game
 import qualified Data.State.Game               as GameState
 
 main :: IO ()
@@ -10,8 +10,8 @@ main = play (InWindow "Connect Four" (700, 600) (10, 10))
             yellow
             0
             GameState.init
-            render
-            (\e s -> traceShow e s)
+            view
+            glossUpdate
             (const id)
 
 

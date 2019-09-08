@@ -4,6 +4,7 @@ module Data.State.Game
   , GameState
   , Data.State.Game.init
   , playTurn
+  , getBoard
   )
 where
 
@@ -26,6 +27,11 @@ data GameState
   | Win Player WinningSlots Board
   | Tie Board
   deriving (Show, Eq)
+
+getBoard :: GameState -> Board
+getBoard (OnGoing _ b) = b
+getBoard (Win _ _ b  ) = b
+getBoard (Tie b      ) = b
 
 init :: GameState
 init = OnGoing PlayerOne Board.init
