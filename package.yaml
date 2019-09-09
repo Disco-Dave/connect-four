@@ -26,8 +26,6 @@ default-extensions:
 dependencies:
 - base-noprelude >= 4.7 && < 5
 - relude
-- array
-- gloss
 
 ghc-options:
 - -Wall
