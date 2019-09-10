@@ -5,13 +5,15 @@ module ConnectFour.State.Board
   , Column(..)
   , Chip(..)
   , State
-  , ConnectFour.State.Board.init
+  , init
   , dropChip
   , undo
   )
 where
 
-import           Prelude                 hiding ( State )
+import           Prelude                 hiding ( State
+                                                , init
+                                                )
 
 -- | Identifies a row on the board.
 data Row
