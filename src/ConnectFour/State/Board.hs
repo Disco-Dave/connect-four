@@ -61,9 +61,8 @@ dropChip chip column board@(State moves) =
 -- | Undo the last move played. If there are no moves to
 -- be undone because the board is empty, then you get
 -- back an empty board.
-undo :: State -> State
-undo b@(State []) = b
-undo (State (_ : t)) = State t
+undo :: State -> Maybe State
+undo = fmap State . viaNonEmpty tail . _moves
 
 -- | Checks if a column is full on the board.
 isColumnFull :: Column -> State -> Bool
