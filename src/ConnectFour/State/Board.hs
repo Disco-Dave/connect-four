@@ -4,14 +4,14 @@ module ConnectFour.State.Board
   ( Row(..)
   , Column(..)
   , Chip(..)
-  , Board
+  , State
   , ConnectFour.State.Board.init
   , dropChip
   , undo
   )
 where
 
-import           Prelude
+import           Prelude                 hiding ( State )
 
 -- | Identifies a row on the board.
 data Row
@@ -41,31 +41,31 @@ data Chip
   deriving Show
 
 -- | Holds the state of the board.
-newtype Board = Board {_moves :: [(Chip, Column)]}
+newtype State = State {_moves :: [(Chip, Column)]}
 
 -- | Initialize an empty connect-four board.
-init :: Board
-init = Board []
+init :: State
+init = State []
 
 -- | Drop a chip into a column on the board.
 -- This will return a new board if there was room for
 -- the chip, otherwise it will return Nothing.
-dropChip :: Chip -> Column -> Board -> Maybe Board
-dropChip chip column board@(Board moves) =
+dropChip :: Chip -> Column -> State -> Maybe State
+dropChip chip column board@(State moves) =
   if isColumnFull column board
     then Nothing
-    else Just $ Board $ (chip, column) : moves
+    else Just $ State $ (chip, column) : moves
 
 -- | Undo the last move played. If there are no moves to
 -- be undone because the board is empty, then you get
 -- back an empty board.
-undo :: Board -> Board
-undo b@(Board []) = b
-undo (Board (_ : t)) = Board t
+undo :: State -> State
+undo b@(State []) = b
+undo (State (_ : t)) = State t
 
 -- | Checks if a column is full on the board.
-isColumnFull :: Column -> Board -> Bool
-isColumnFull column (Board moves) =
+isColumnFull :: Column -> State -> Bool
+isColumnFull column (State moves) =
   let columnHeight    = length $ filter ((== column) . snd) moves
       maxColumnHeight = 1 + fromEnum (maxBound :: Row)
   in  columnHeight >= maxColumnHeight
