@@ -58,9 +58,7 @@ dropChip chip column board@(State moves) =
     then Nothing
     else Just $ State $ (chip, column) : moves
 
--- | Undo the last move played. If there are no moves to
--- be undone because the board is empty, then you get
--- back an empty board.
+-- | Undo the last move played.
 undo :: State -> Maybe State
 undo = fmap State . viaNonEmpty tail . _moves
 
