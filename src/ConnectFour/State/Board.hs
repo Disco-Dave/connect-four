@@ -51,7 +51,7 @@ init = Board []
 -- This will return a new board if there was room for
 -- the chip, otherwise it will return Nothing.
 dropChip :: Chip -> Column -> Board -> Maybe Board
-dropChip chip column board@(Board moves) = 
+dropChip chip column board@(Board moves) =
   if isColumnFull column board
     then Nothing
     else Just $ Board $ (chip, column) : moves
@@ -66,5 +66,6 @@ undo (Board (_ : t)) = Board t
 -- | Checks if a column is full on the board.
 isColumnFull :: Column -> Board -> Bool
 isColumnFull column (Board moves) =
-  let chipsInColumn = filter ((== column) . snd) moves
-  in  length chipsInColumn >= 7
+  let columnHeight    = length $ filter ((== column) . snd) moves
+      maxColumnHeight = 1 + fromEnum (maxBound :: Row)
+  in  columnHeight >= maxColumnHeight
