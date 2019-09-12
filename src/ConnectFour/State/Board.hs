@@ -8,11 +8,18 @@ module ConnectFour.State.Board
   , init
   , dropChip
   , undo
+  , snapshot
+  , Snapshot
   )
 where
 
 import           Prelude                 hiding ( State
                                                 , init
+                                                )
+import           GHC.Arr                        ( unsafeIndex )
+import qualified Data.Array                    as Array
+import           Data.Array                     ( Array
+                                                , Ix(..)
                                                 )
 
 -- | Identifies a row on the board.
@@ -25,6 +32,11 @@ data Row
   | RowSix
   deriving (Show, Eq, Ord, Bounded, Enum)
 
+instance Ix Row where
+  range (s, e) = [s .. e]
+  inRange (s, e) i = i `elem` range (s, e)
+  unsafeIndex (s, _) i = fromEnum i - fromEnum s
+
 -- | Identifies a column on the board.
 data Column
   = ColumnOne
@@ -35,6 +47,11 @@ data Column
   | ColumnSix
   | ColumnSeven
   deriving (Show, Eq, Ord, Bounded, Enum)
+
+instance Ix Column where
+  range (s, e) = [s .. e]
+  inRange (s, e) i = i `elem` range (s, e)
+  unsafeIndex (s, _) i = fromEnum i - fromEnum s
 
 -- | Identifies a chip that can be dropped onto the board.
 data Chip
@@ -53,10 +70,9 @@ init = State []
 -- This will return a new board if there was room for
 -- the chip, otherwise it will return Nothing.
 dropChip :: Chip -> Column -> State -> Maybe State
-dropChip chip column board@(State moves) =
-  if isColumnFull column board
-    then Nothing
-    else Just $ State $ (chip, column) : moves
+dropChip chip column board@(State moves) = if isColumnFull column board
+  then Nothing
+  else Just $ State $ (chip, column) : moves
 
 -- | Undo the last move played.
 undo :: State -> Maybe State
@@ -68,3 +84,21 @@ isColumnFull column (State moves) =
   let columnHeight    = length $ filter ((== column) . snd) moves
       maxColumnHeight = 1 + fromEnum (maxBound :: Row)
   in  columnHeight >= maxColumnHeight
+
+-- | A snapshot of the board's state.
+type Snapshot = Array Column (Array Row (Maybe Chip))
+
+-- | Create a snapshot of the board's state.
+snapshot :: State -> Snapshot
+snapshot (State moves) = Array.array (minBound, maxBound) columns
+ where
+  leftZip []        _         = []
+  leftZip (ah : at) []        = (ah, Nothing) : leftZip at []
+  leftZip (ah : at) (bh : bt) = (ah, Just bh) : leftZip at bt
+
+  columns = [ (column, getColumnSlots column) | column <- [minBound ..] ]
+
+  getColumnSlots column = Array.array (minBound, maxBound) slotsWithRow
+   where
+    slots = reverse [ chip | (chip, column') <- moves, column' == column ]
+    slotsWithRow = leftZip [maxBound, pred maxBound ..] slots
