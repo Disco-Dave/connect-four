@@ -8,6 +8,7 @@ module ConnectFour.State.Board
   , init
   , dropChip
   , undo
+  , isFull
   , snapshot
   , Snapshot
   )
@@ -84,6 +85,13 @@ isColumnFull column (State moves) =
   let columnHeight    = length $ filter ((== column) . snd) moves
       maxColumnHeight = 1 + fromEnum (maxBound :: Row)
   in  columnHeight >= maxColumnHeight
+
+isFull :: State -> Bool
+isFull (State moves) = moveLength >= maxLength
+ where
+  moveLength = length moves
+  maxLength =
+    (fromEnum (maxBound :: Row) + 1) * (fromEnum (maxBound :: Column) + 1)
 
 -- | A snapshot of the board's state.
 type Snapshot = Array Column (Array Row (Maybe Chip))
