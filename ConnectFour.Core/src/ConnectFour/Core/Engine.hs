@@ -1,5 +1,5 @@
 -- | High level API for interacting with the game.
-module ConnectFour.Engine
+module ConnectFour.Core.Engine
   ( Command(..)
   , init
   , update
@@ -7,8 +7,8 @@ module ConnectFour.Engine
 where
 
 import           Prelude                 hiding ( init )
-import           ConnectFour.State.Board        ( Column )
-import qualified ConnectFour.State.Game        as Game
+import           ConnectFour.Core.State.Board   ( Column )
+import qualified ConnectFour.Core.State.Game   as Game
 
 -- | Initialize a new game.
 init :: Game.State

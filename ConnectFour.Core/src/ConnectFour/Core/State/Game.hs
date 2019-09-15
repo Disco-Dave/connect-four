@@ -1,4 +1,5 @@
-module ConnectFour.State.Game
+-- | All of the logic related to the game's state.
+module ConnectFour.Core.State.Game
   ( Status
   , State
   , init
@@ -11,7 +12,7 @@ import           Prelude                 hiding ( init
                                                 , state
                                                 , State
                                                 )
-import qualified ConnectFour.State.Board       as Board
+import qualified ConnectFour.Core.State.Board  as Board
 
 -- | The status of the game's state.
 data Status
