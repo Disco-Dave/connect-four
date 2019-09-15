@@ -1,6 +1,6 @@
 -- | Holds all of the logic for creating and manipulating
 -- the state of a connect-four board.
-module ConnectFour.Core.State.Board
+module ConnectFour.Core.Internal.State.Board
   ( Row(..)
   , Column(..)
   , Chip(..)
