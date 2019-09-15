@@ -14,7 +14,7 @@ module ConnectFour.Core.Internal.State.Board
   )
 where
 
-import           Prelude                 hiding ( State
+import           Relude                  hiding ( State
                                                 , init
                                                 )
 import           GHC.Arr                        ( unsafeIndex )

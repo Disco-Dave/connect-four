@@ -8,7 +8,7 @@ module ConnectFour.Core.Internal.State.Game
   )
 where
 
-import           Prelude                 hiding ( init
+import           Relude                  hiding ( init
                                                 , state
                                                 , State
                                                 )

@@ -6,7 +6,6 @@ module ConnectFour.Core
   )
 where
 
-import           Prelude                 hiding ( init )
 import           ConnectFour.Core.Internal.State.Board ( Column )
 import qualified ConnectFour.Core.Internal.State.Game as Game
 
