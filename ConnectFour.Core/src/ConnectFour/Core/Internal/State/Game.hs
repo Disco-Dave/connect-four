@@ -38,7 +38,7 @@ undo state =
         Just newBoard -> State newBoard (OnGoing newChip)
   in  case gameStatus state of
         OnGoing chip -> undoState $ otherChip chip
-        Win chip _   -> undoState $ otherChip chip
+        Win chip _   -> undoState chip
         Tie          -> undoState Board.BlueChip
 
 -- | Play a move if possible.
