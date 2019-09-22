@@ -23,6 +23,8 @@ default-extensions:
 - NoImplicitPrelude
 - OverloadedStrings
 - ViewPatterns
+- NamedFieldPuns
+- RecordWildCards
 
 dependencies:
 - base >= 4.7 && < 5

@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module Main where
 
 import           Relude                  hiding ( init )
@@ -18,23 +16,36 @@ main = play (InWindow "Connect Four" (700, 660) (10, 10))
             handleEvent
             (const id)
 
-init :: World
-init = World
 
-data World = World
+{- MODEL -}
+
+newtype World = World { scaleFactor :: Float }
+
+init :: World
+init = World 1.0
+
+
+
+{- UPDATE -}
 
 handleEvent :: Event -> World -> World
+handleEvent (EventResize (w, l)) oldWorld = if (w % l) <= (35 % 33)
+  then oldWorld { scaleFactor = fromIntegral w / 700.0 }
+  else oldWorld { scaleFactor = fromIntegral l / 660.0 }
+
 handleEvent _ v = v
 
 
-{- VIEW CODE -}
+
+{- VIEW -}
 
 drawPicture :: World -> Picture
-drawPicture world = Pictures [drawBoard world, drawCommandBar world]
-
+drawPicture world@World {..} =
+  scale scaleFactor scaleFactor $ Pictures [drawBoard world, drawCommandBar world]
 
 drawBoard :: World -> Picture
-drawBoard _ = translate 0 (-30) $ color yellow $ rectangleSolid 700 600
+drawBoard World {..} =
+  translate 0 (-30) $ color yellow $ rectangleSolid 700 600
 
 drawCommandBar :: World -> Picture
-drawCommandBar _ = translate 0 300 $ color red $ rectangleSolid 700 60
+drawCommandBar World {..} = translate 0 300 $ color red $ rectangleSolid 700 60
