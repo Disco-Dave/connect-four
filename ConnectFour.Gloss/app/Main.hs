@@ -29,7 +29,7 @@ init = World 1.0
 {- UPDATE -}
 
 handleEvent :: Event -> World -> World
-handleEvent (EventResize (w, l)) oldWorld = if (w % l) <= (35 % 33)
+handleEvent (EventResize (w, l)) oldWorld = if (w % l) <= (700 % 660)
   then oldWorld { scaleFactor = fromIntegral w / 700.0 }
   else oldWorld { scaleFactor = fromIntegral l / 660.0 }
 
@@ -40,12 +40,20 @@ handleEvent _ v = v
 {- VIEW -}
 
 drawPicture :: World -> Picture
-drawPicture world@World {..} =
-  scale scaleFactor scaleFactor $ Pictures [drawBoard world, drawCommandBar world]
+drawPicture world@World {..} = scale scaleFactor scaleFactor
+  $ Pictures [drawBoard world, drawCommandBar world]
 
 drawBoard :: World -> Picture
-drawBoard World {..} =
-  translate 0 (-30) $ color yellow $ rectangleSolid 700 600
+drawBoard World {..} = translate 0 (-30) $ Pictures
+  [ color yellow $ rectangleSolid 700 600
+  , color black $ circleSolid 40.0
+  ]
 
 drawCommandBar :: World -> Picture
-drawCommandBar World {..} = translate 0 300 $ color red $ rectangleSolid 700 60
+drawCommandBar World {..} = translate 0 300 $ Pictures
+  [ color black $ rectangleSolid 700 60
+  , translate 160 (-15) $ color white $ scale 0.25 0.25 $ text "Reset"
+  , translate 260 (-15) $ color white $ scale 0.25 0.25 $ text "Undo"
+  , translate (-340) (-15) $ color white $ scale 0.25 0.25 $ text "Winner: Blue"
+  ]
+
