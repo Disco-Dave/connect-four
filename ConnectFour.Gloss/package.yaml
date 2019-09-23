@@ -31,6 +31,7 @@ dependencies:
 - relude
 - connect-four-core
 - gloss
+- array
 
 library:
   source-dirs: src

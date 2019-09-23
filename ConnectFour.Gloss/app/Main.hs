@@ -5,7 +5,12 @@ import           Relude                  hiding ( init )
 import           Graphics.Gloss
 import           Graphics.Gloss.Interface.IO.Interact
 
+import qualified ConnectFour.Core              as Core
+
 import           Data.Ratio
+import           Data.Array                     ( Array
+                                                , (!)
+                                                )
 
 main :: IO ()
 main = play (InWindow "Connect Four" (700, 660) (10, 10))
@@ -19,11 +24,13 @@ main = play (InWindow "Connect Four" (700, 660) (10, 10))
 
 {- MODEL -}
 
-newtype World = World { scaleFactor :: Float }
+data World = World
+  { scaleFactor :: Float
+  , gameState :: Core.State
+  }
 
 init :: World
-init = World 1.0
-
+init = World { scaleFactor = 1.0, gameState = Core.init }
 
 
 {- UPDATE -}
@@ -44,16 +51,43 @@ drawPicture world@World {..} = scale scaleFactor scaleFactor
   $ Pictures [drawBoard world, drawCommandBar world]
 
 drawBoard :: World -> Picture
-drawBoard World {..} = translate 0 (-30) $ Pictures
-  [ color yellow $ rectangleSolid 700 600
-  , color black $ circleSolid 40.0
-  ]
+drawBoard World {..} =
+  let (Core.view -> Core.StateView{..}) = gameState
+      drawColumn' x column = drawColumn x (boardState ! column)
+      xs = [-300, -200, -100, 0, 100, 200, 300]
+  in  translate 0 (-30)
+        $ Pictures
+        $ color yellow (rectangleSolid 700 600)
+        : [ drawColumn' x column
+          | (x, column) <- zip xs [minBound .. maxBound]
+          ]
+
+drawColumn :: Float -> Array Core.Row (Maybe Core.Chip) -> Picture
+drawColumn x column =
+  let ys = [250, 150, 50, -50, -150, -250]
+  in  Pictures
+        [ translate x y $ drawChip (column ! row)
+        | (y, row) <- zip ys [minBound .. maxBound]
+        ]
+
+drawChip :: Maybe Core.Chip -> Picture
+drawChip Nothing              = color black $ circleSolid 45
+drawChip (Just Core.RedChip ) = color red $ circleSolid 45
+drawChip (Just Core.BlueChip) = color blue $ circleSolid 45
 
 drawCommandBar :: World -> Picture
-drawCommandBar World {..} = translate 0 300 $ Pictures
-  [ color black $ rectangleSolid 700 60
-  , translate 160 (-15) $ color white $ scale 0.25 0.25 $ text "Reset"
-  , translate 260 (-15) $ color white $ scale 0.25 0.25 $ text "Undo"
-  , translate (-340) (-15) $ color white $ scale 0.25 0.25 $ text "Winner: Blue"
-  ]
-
+drawCommandBar World {..} =
+  let (Core.view -> Core.StateView{..}) = gameState
+      chipToText Core.RedChip  = "Red"
+      chipToText Core.BlueChip = "Blue"
+      statusText = case gameStatus of
+        Core.OnGoing chip -> "Turn: " <> chipToText chip
+        Core.Win chip _   -> "Winner: " <> chipToText chip
+        Core.Tie          -> "Tie"
+  in  translate 0 300 $ Pictures
+        [ color black $ rectangleSolid 700 60
+        , translate 160 (-15) $ color white $ scale 0.25 0.25 $ text "Reset"
+        , translate 260 (-15) $ color white $ scale 0.25 0.25 $ text "Undo"
+        , translate (-340) (-15) $ color white $ scale 0.25 0.25 $ text
+          statusText
+        ]
