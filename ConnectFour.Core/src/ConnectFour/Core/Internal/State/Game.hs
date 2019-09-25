@@ -83,7 +83,10 @@ playMove column gameState@(State board (OnGoing_ chip)) =
 
 -- | Find the winner.
 findWinner :: Board.State -> Maybe (Board.Chip, Set (Board.Column, Board.Row))
-findWinner _ = Nothing -- What is the most efficient and elegant way to do this?
+findWinner state =
+  let lastMove      = Board.lastMove state
+      boardSnapshot = Board.snapshot state
+  in  traceShow lastMove Nothing -- What is the most efficient and elegant way to do this?
 
 -- | Compute the opposite chip
 otherChip :: Board.Chip -> Board.Chip

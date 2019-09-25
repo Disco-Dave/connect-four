@@ -11,6 +11,7 @@ module ConnectFour.Core.Internal.State.Board
   , isFull
   , snapshot
   , Snapshot
+  , lastMove
   )
 where
 
@@ -110,3 +111,10 @@ snapshot (State moves) = Array.array (minBound, maxBound) columns
    where
     slots = reverse [ chip | (chip, column') <- moves, column' == column ]
     slotsWithRow = leftZip [maxBound, pred maxBound ..] slots
+
+lastMove :: State -> Maybe (Column, Row, Chip)
+lastMove (State []) = Nothing
+lastMove (State ((chip, column) : xs)) = 
+  let columnLength = length $ filter ((== column) . snd) xs
+  in Just (column, toEnum (5 - columnLength)  , chip)
+
