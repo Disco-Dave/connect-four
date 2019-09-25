@@ -48,19 +48,29 @@ handleEvent evt@(EventKey (MouseButton LeftButton) Up _ (x, y)) oldWorld =
         then oldWorld
         else if
           | y <= (330 * scaleFactor) && y > (270 * scaleFactor) -> 
-            handleCommandEvent (x, y) oldWorld
+            handleCommandEvent x oldWorld
           | y <= (270 * scaleFactor) && y > (-330 * scaleFactor) -> 
-            handleBoardEvent (x, y) oldWorld
+            handleBoardEvent x oldWorld
           | otherwise -> 
             oldWorld
 
 handleEvent _ v = v
 
-handleCommandEvent :: (Float, Float) -> World -> World
-handleCommandEvent (x, y) = traceShow $ show (x, y) <> "A command event"
+handleCommandEvent :: Float -> World -> World
+handleCommandEvent x oldWorld = 
+  let World {..} = oldWorld
+      newGameState = 
+        if
+          | x >= (scaleFactor * 160) && x < (scaleFactor * 260) ->
+            Core.update Core.Restart gameState
+          | x >= (scaleFactor * 260) && x < (scaleFactor * 350) ->
+            Core.update Core.Undo gameState
+          | otherwise ->
+            gameState
+   in oldWorld { gameState = newGameState }
 
-handleBoardEvent :: (Float, Float) -> World -> World
-handleBoardEvent (x, y) oldWorld =
+handleBoardEvent :: Float -> World -> World
+handleBoardEvent x oldWorld =
   let World {..}   = oldWorld
       newGameState = if
         | x <= (-250 * scaleFactor) -> 
