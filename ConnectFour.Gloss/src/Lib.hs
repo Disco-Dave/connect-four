@@ -42,7 +42,42 @@ handleEvent (EventResize (w, l)) oldWorld = if (w % l) <= (700 % 660)
   then oldWorld { scaleFactor = fromIntegral w / 700.0 }
   else oldWorld { scaleFactor = fromIntegral l / 660.0 }
 
+handleEvent evt@(EventKey (MouseButton LeftButton) Up _ (x, y)) oldWorld =
+  let World {..} = oldWorld
+  in  if x < (-350 * scaleFactor) || x > (350 * scaleFactor)
+        then oldWorld
+        else if
+          | y <= (330 * scaleFactor) && y > (270 * scaleFactor) -> 
+            handleCommandEvent (x, y) oldWorld
+          | y <= (270 * scaleFactor) && y > (-330 * scaleFactor) -> 
+            handleBoardEvent (x, y) oldWorld
+          | otherwise -> 
+            oldWorld
+
 handleEvent _ v = v
+
+handleCommandEvent :: (Float, Float) -> World -> World
+handleCommandEvent (x, y) = traceShow $ show (x, y) <> "A command event"
+
+handleBoardEvent :: (Float, Float) -> World -> World
+handleBoardEvent (x, y) oldWorld =
+  let World {..}   = oldWorld
+      newGameState = if
+        | x <= (-250 * scaleFactor) -> 
+          Core.update (Core.PlayMove Core.ColumnOne) gameState
+        | x <= (-150 * scaleFactor) -> 
+          Core.update (Core.PlayMove Core.ColumnTwo) gameState
+        | x <= (-50 * scaleFactor) -> 
+          Core.update (Core.PlayMove Core.ColumnThree) gameState
+        | x <= (50 * scaleFactor) -> 
+          Core.update (Core.PlayMove Core.ColumnFour) gameState
+        | x <= (150 * scaleFactor) -> 
+          Core.update (Core.PlayMove Core.ColumnFive) gameState
+        | x <= (250 * scaleFactor) -> 
+          Core.update (Core.PlayMove Core.ColumnSix) gameState
+        | otherwise -> 
+          Core.update (Core.PlayMove Core.ColumnSeven) gameState
+  in  oldWorld { gameState = newGameState }
 
 
 
