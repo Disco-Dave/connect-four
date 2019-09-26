@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 -- | Holds all of the logic for creating and manipulating
 -- the state of a connect-four board.
 module ConnectFour.Core.Internal.State.Board
@@ -114,7 +116,9 @@ snapshot (State moves) = Array.array (minBound, maxBound) columns
 
 lastMove :: State -> Maybe (Column, Row, Chip)
 lastMove (State []) = Nothing
-lastMove (State ((chip, column) : xs)) = 
-  let columnLength = length $ filter ((== column) . snd) xs
-  in Just (column, toEnum (5 - columnLength)  , chip)
+lastMove (State ((chip, column) : xs)) =
+  let columnHeight    = length $ filter ((== column) . snd) xs
+      maxColumnHeight = fromEnum $ maxBound @Row
+      row             = toEnum $ maxColumnHeight - columnHeight
+  in  Just (column, row, chip)
 
