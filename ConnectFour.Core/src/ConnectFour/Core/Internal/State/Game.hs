@@ -9,9 +9,6 @@ module ConnectFour.Core.Internal.State.Game
   , init
   , undo
   , playMove
-  
-  , createHorizontalRange
-  , createVerticalRange
   )
 where
 
