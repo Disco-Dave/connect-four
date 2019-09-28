@@ -61,7 +61,7 @@ instance Ix Column where
 data Chip
   = RedChip
   | BlueChip
-  deriving Show
+  deriving (Show, Eq)
 
 -- | Holds the state of the board.
 newtype State = State {_moves :: [(Chip, Column)]}

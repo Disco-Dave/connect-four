@@ -131,7 +131,7 @@ drawCommandBar World {..} =
       chipToText Core.BlueChip = "Blue"
       statusText = case gameStatus of
         Core.OnGoing chip -> "Turn: " <> chipToText chip
-        Core.Win chip _   -> "Winner: " <> chipToText chip
+        Core.Win     chip -> "Winner: " <> chipToText chip
         Core.Tie          -> "Tie"
   in  translate 0 300 $ Pictures
         [ color black $ rectangleSolid 700 60
