@@ -75,7 +75,7 @@ undo state =
 -- | Play a move if possible.
 playMove :: Board.Column -> State -> State
 playMove _ gameState@(State _ (Win_ _)) = gameState
-playMove _ gameState@(State _ Tie_      ) = gameState
+playMove _ gameState@(State _ Tie_    ) = gameState
 playMove column gameState@(State board (OnGoing_ chip)) =
   case Board.dropChip chip column board of
     Nothing       -> gameState
@@ -99,20 +99,23 @@ findWinner state = case Board.lastMove state of
     let boardSnapshot = Board.snapshot state
         slot          = (column, row)
         slotToChip (c, r) = (boardSnapshot ! c) ! r
-        isTheSameChip c = Just chip == c 
         movesToCheck =
-            slide 4 (slotToChip <$> createVerticalRange slot)
-              <> slide 4 (slotToChip <$> createHorizontalRange slot)
-              <> slide 4 (slotToChip <$> createLeftToRightDiagonalRange slot)
-              <> slide 4 (slotToChip <$> createRightToLeftDiagonalRange slot)
-    in  if any (all isTheSameChip) movesToCheck
-           then Just chip
+            foldMap
+                (\r -> slide 4 (slotToChip <$> r slot))
+                [ createVerticalRange
+                , createHorizontalRange
+                , createLeftToRightDiagonalRange
+                , createRightToLeftDiagonalRange
+                ]
+    in  if any (all (Just chip ==)) movesToCheck 
+           then Just chip 
            else Nothing
 
 slide :: Int -> [a] -> [[a]]
 slide _ [] = []
 slide n xs | n <= 0 || length xs < n = []
-slide n xs@(_ : tail') = part : slide n tail' where part = take n xs
+slide n xs@(_ : tail') = part : slide n tail' 
+  where part = take n xs
 
 createVerticalRange :: Slot -> [Slot]
 createVerticalRange slot =
